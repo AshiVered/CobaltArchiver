@@ -21,16 +21,42 @@ def compress():
 
 
 # פונקציה לחילוץ קבצים מארכיון
+# פונקציה לחילוץ קבצים מארכיון
 def extract():
     archive_name = filedialog.askopenfilename(title="בחר את הארכיון לחילוץ", filetypes=[("7z files", "*.7z"), ("All files", "*.*")])
     if archive_name:
         extract_dir = filedialog.askdirectory(title="בחר תיקיה לחילוץ הקבצים")
         if extract_dir:
-            try:
-                subprocess.run(["7za", "x", archive_name, f"-o{extract_dir}"], check=True)
-                messagebox.showinfo("הצלחה", f"הקבצים חולצו בהצלחה לתיקיה {extract_dir}.")
-            except subprocess.CalledProcessError as e:
-                messagebox.showerror("שגיאה", f"שגיאה בחילוץ הקבצים: {e}")
+            # בדיקה אם יש קבצים קיימים בתיקיה עם אותם שמות
+            existing_files = os.listdir(extract_dir)
+            process = subprocess.Popen(["7za", "l", archive_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            stdout = stdout.decode("utf-8", errors="ignore")
+            files_to_extract = [line.split()[-1] for line in stdout.splitlines() if line]
+
+            # קובעים אם יש קובץ קיים שצריך לטפל בו
+            overlapping_files = [file for file in files_to_extract if file in existing_files]
+            
+            if overlapping_files:
+                response = messagebox.askquestion(
+                    "קבצים קיימים",
+                    f"הקבצים הבאים כבר קיימים בתיקיה:\n\n" + "\n".join(overlapping_files) +
+                    "\n\nהאם להמשיך ולדרוס את הקבצים הקיימים?",
+                )
+                if response == "yes":
+                    try:
+                        subprocess.run(["7za", "x", archive_name, f"-o{extract_dir}", "-y"], check=True)
+                        messagebox.showinfo("הצלחה", f"הקבצים חולצו בהצלחה לתיקיה {extract_dir}.")
+                    except subprocess.CalledProcessError as e:
+                        messagebox.showerror("שגיאה", f"שגיאה בחילוץ הקבצים: {e}")
+                else:
+                    messagebox.showinfo("בוטל", "החילוץ בוטל.")
+            else:
+                try:
+                    subprocess.run(["7za", "x", archive_name, f"-o{extract_dir}"], check=True)
+                    messagebox.showinfo("הצלחה", f"הקבצים חולצו בהצלחה לתיקיה {extract_dir}.")
+                except subprocess.CalledProcessError as e:
+                    messagebox.showerror("שגיאה", f"שגיאה בחילוץ הקבצים: {e}")
     else:
         messagebox.showwarning("שגיאה", "לא נבחר ארכיון לחילוץ.")
 
@@ -198,7 +224,7 @@ def show_about():
     label = tk.Label(
         about_window,
         text=(
-            "גרסא 0.1\n"
+            "גרסא 0.2\n"
             "פותח על ידי אשי ורד\n"
             "עבור ישיבת מדברה כעדן - מצפה רמון"
         ),
