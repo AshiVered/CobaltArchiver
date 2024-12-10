@@ -7,7 +7,7 @@
 ## הרצה
 הרץ את קובץ הPython בתוך תיקיית 7z cli - ניתן להוריד מכאן
 https://www.7-zip.org/a/7z2409-extra.7z
-או לחלופין להריץ את קובץ הexe מף הreleases.
+או לחלופין להריץ את קובץ הexe מדף הreleases.
 
 
 ## CobaltArchiver
