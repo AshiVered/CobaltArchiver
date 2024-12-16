@@ -9,10 +9,11 @@ import re
 def compress():
     files_to_compress = filedialog.askopenfilenames(title="בחר קבצים לדחיסה")
     if files_to_compress:
-        archive_name = filedialog.asksaveasfilename(defaultextension=".7z", filetypes=[("7z files", "*.7z"), ("All files", "*.*")], title="בחר שם לארכיון")
+        archive_name = filedialog.asksaveasfilename(defaultextension=".zip", filetypes=[("Zip Files", "*.zip"), ("7z Files", "*.7z"), 
+                      ("Tar Files", "*.tar"), ("Wim Files", "*.wim"), ("All files", "*.*")], title="בחר שם לארכיון")
         if archive_name:
             try:
-                subprocess.run(["7za", "a", archive_name] + list(files_to_compress), check=True)
+                subprocess.run(["7z", "a", archive_name] + list(files_to_compress), check=True)
                 messagebox.showinfo("הצלחה", f"הקבצים דחוסים בהצלחה לארכיון {archive_name}.")
             except subprocess.CalledProcessError as e:
                 messagebox.showerror("שגיאה", f"שגיאה בדחיסת הקבצים: {e}")
@@ -21,15 +22,18 @@ def compress():
 
 
 # פונקציה לחילוץ קבצים מארכיון
-# פונקציה לחילוץ קבצים מארכיון
 def extract():
-    archive_name = filedialog.askopenfilename(title="בחר את הארכיון לחילוץ", filetypes=[("7z files", "*.7z"), ("All files", "*.*")])
+    archive_name = filedialog.askopenfilename(title="בחר את הארכיון לחילוץ",    filetypes=[
+        ("Archive Files", "*.zip *.7z *.rar *.tar *.gz *.bz2 *.xz *.wim"),
+        ("All files", "*.*")
+    ]
+)
     if archive_name:
         extract_dir = filedialog.askdirectory(title="בחר תיקיה לחילוץ הקבצים")
         if extract_dir:
             # בדיקה אם יש קבצים קיימים בתיקיה עם אותם שמות
             existing_files = os.listdir(extract_dir)
-            process = subprocess.Popen(["7za", "l", archive_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(["7z", "l", archive_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             stdout = stdout.decode("utf-8", errors="ignore")
             files_to_extract = [line.split()[-1] for line in stdout.splitlines() if line]
@@ -45,7 +49,7 @@ def extract():
                 )
                 if response == "yes":
                     try:
-                        subprocess.run(["7za", "x", archive_name, f"-o{extract_dir}", "-y"], check=True)
+                        subprocess.run(["7z", "x", archive_name, f"-o{extract_dir}", "-y"], check=True)
                         messagebox.showinfo("הצלחה", f"הקבצים חולצו בהצלחה לתיקיה {extract_dir}.")
                     except subprocess.CalledProcessError as e:
                         messagebox.showerror("שגיאה", f"שגיאה בחילוץ הקבצים: {e}")
@@ -53,7 +57,7 @@ def extract():
                     messagebox.showinfo("בוטל", "החילוץ בוטל.")
             else:
                 try:
-                    subprocess.run(["7za", "x", archive_name, f"-o{extract_dir}"], check=True)
+                    subprocess.run(["7z", "x", archive_name, f"-o{extract_dir}"], check=True)
                     messagebox.showinfo("הצלחה", f"הקבצים חולצו בהצלחה לתיקיה {extract_dir}.")
                 except subprocess.CalledProcessError as e:
                     messagebox.showerror("שגיאה", f"שגיאה בחילוץ הקבצים: {e}")
@@ -63,12 +67,16 @@ def extract():
 
 # פונקציה להצגת תוכן הארכיון
 def show_archive():
-    archive_name = filedialog.askopenfilename(title="בחר את הארכיון לצפייה", filetypes=[("7z files", "*.7z"), ("All files", "*.*")])
+    archive_name = filedialog.askopenfilename(title="בחר את הארכיון לצפייה",     filetypes=[
+        ("Archive Files", "*.zip *.7z *.rar *.tar *.gz *.bz2 *.xz *.wim"),
+        ("All files", "*.*")
+    ]
+)
     if archive_name:
         try:
             # קריאת הפלט בצורה בינארית
             process = subprocess.Popen(
-                ["7za", "l", archive_name],
+                ["7z", "l", archive_name],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
@@ -83,7 +91,7 @@ def show_archive():
                 messagebox.showwarning("אזהרה", "הארכיון אינו בקידוד UTF-8, ייתכנו בעיות בהצגת נתונים.")
 
             if process.returncode != 0:
-                raise Exception(f"לא ניתן להפעיל את הפקודה 7za: {stderr.decode('utf-8', errors='ignore')}")
+                raise Exception(f"לא ניתן להפעיל את הפקודה 7z: {stderr.decode('utf-8', errors='ignore')}")
 
             file_info = []
             file_pattern = re.compile(r"^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+(\S+)\s+(\d+)\s+(\d+|)\s+(.+)$")
@@ -117,7 +125,7 @@ def show_archive_window(file_info, archive_name):
         files_to_add = filedialog.askopenfilenames(title="בחר קבצים להוספה לארכיון")
         if files_to_add:
             try:
-                subprocess.run(["7za", "a", archive_name] + list(files_to_add), check=True)
+                subprocess.run(["7z", "a", archive_name] + list(files_to_add), check=True)
                 messagebox.showinfo("הצלחה", f"הקבצים נוספו בהצלחה לארכיון {archive_name}.")
                 refresh_file_list()  # רענון הרשימה
             except subprocess.CalledProcessError as e:
@@ -131,7 +139,7 @@ def show_archive_window(file_info, archive_name):
 
         filename = tree.item(selected_item)["values"][0]
         try:
-            subprocess.run(["7za", "d", archive_name, filename], check=True)
+            subprocess.run(["7z", "d", archive_name, filename], check=True)
             messagebox.showinfo("הצלחה", f"הקובץ {filename} הוסר בהצלחה מהארכיון.")
             refresh_file_list()  # רענון הרשימה
         except subprocess.CalledProcessError as e:
@@ -184,6 +192,10 @@ def show_archive_window(file_info, archive_name):
 
     button_frame = tk.Frame(window)
     button_frame.pack(fill="x", pady=5)
+    try:
+        window.iconbitmap("icon.ico")  # החלף את 'path_to_icon.ico' בנתיב לקובץ ה-ICO שלך
+    except Exception as e:
+        print(f"שגיאה בטעינת סמל: {e}")
 
     tk.Button(button_frame, text="הוסף קובץ", command=add_file).pack(side="left", padx=5)
     tk.Button(button_frame, text="הסר קובץ", command=remove_file).pack(side="left", padx=5)
@@ -193,7 +205,7 @@ def show_archive_window(file_info, archive_name):
 # פונקציה לקבלת תוכן הארכיון המעודכן
 def get_archive_file_info(archive_name):
     try:
-        process = subprocess.Popen(["7za", "l", archive_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(["7z", "l", archive_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         stdout = stdout.decode("utf-8", errors="ignore")
 
@@ -219,32 +231,80 @@ def get_archive_file_info(archive_name):
 def show_about():
     about_window = tk.Toplevel()
     about_window.title("אודות התוכנה")
+    try:
+        about_window.iconbitmap("icon.ico")  # החלף את 'path_to_icon.ico' בנתיב לקובץ ה-ICO שלך
+    except Exception as e:
+        print(f"שגיאה בטעינת סמל: {e}")
+    # הגדרת מסגרת לתוכן
+    content_frame = tk.Frame(about_window, padx=10, pady=10)
+    content_frame.pack()
 
-    # הגדרת התווית עם טקסט ממורכז
-    label = tk.Label(
-        about_window,
-        text=(
-            "גרסא 0.2\n"
-            "פותח על ידי אשי ורד\n"
-            "עבור ישיבת מדברה כעדן - מצפה רמון"
-        ),
-        font=("Arial", 10),  # גופן קטן יותר
-        justify="center",   # טקסט ממורכז
-        anchor="center",    # ממקם את הטקסט במרכז התווית
-        padx=10,
-        pady=10,
-    )
-    label.pack()
+    # שורה ראשונה - כותרת
+    tk.Label(
+        content_frame,
+        text="CobaltArchiver",
+        font=("Arial", 14, "bold"),  # פונט מודגש וגדול יותר
+        anchor="center"
+    ).pack()
 
-    # כפתור סגירה
-    close_button = tk.Button(about_window, text="סגור", command=about_window.destroy)
-    close_button.pack(pady=10)
+    # שורה שנייה - גרסא
+    tk.Label(
+        content_frame,
+        text="גרסא 0.3",
+        font=("Arial", 10),
+        anchor="center"
+    ).pack()
+
+    # רווח
+    tk.Label(content_frame, text="").pack()
+
+    # שורות נוספות עם המידע
+    tk.Label(
+        content_frame,
+        text="פותח על ידי אשי ורד",
+        font=("Arial", 10),
+        anchor="center"
+    ).pack()
+
+    tk.Label(
+        content_frame,
+        text="עבור ישיבת מדברה כעדן - מצפה רמון",
+        font=("Arial", 10),
+        anchor="center"
+    ).pack()
+
+    # מסגרת ללחצנים
+    button_frame = tk.Frame(about_window, pady=10)
+    button_frame.pack()
+
+    # לחצן GitHub
+    def open_github():
+        import webbrowser
+        webbrowser.open("https://github.com/ashivered/cobaltarchiver")
+
+    tk.Button(
+        button_frame,
+        text="GitHub",
+        command=open_github
+    ).pack(side="left", padx=5)
+
+    # לחצן Icons
+    def open_icons():
+        import webbrowser
+        webbrowser.open("https://icons8.com")
+
+    tk.Button(
+        button_frame,
+        text="Icons by icons8.com",
+        command=open_icons
+    ).pack(side="left", padx=5)
 
     # התאמת גודל החלון לתוכן
-    about_window.update_idletasks()  # מעדכן את המידות
+    about_window.update_idletasks()
     width = about_window.winfo_reqwidth()
     height = about_window.winfo_reqheight()
     about_window.geometry(f"{width}x{height}")
+
 
 
 # יצירת הממשק הראשי
@@ -252,6 +312,10 @@ def main():
     root = tk.Tk()
     root.title("CobaltArchiver")
     root.geometry("300x200")
+    try:
+        root.iconbitmap("icon.ico")  # החלף את 'path_to_icon.ico' בנתיב לקובץ ה-ICO שלך
+    except Exception as e:
+        print(f"שגיאה בטעינת סמל: {e}")
 
     tk.Button(root, text="דחיסת קבצים", command=compress, width=20).pack(pady=10)
     tk.Button(root, text="חילוץ קבצים", command=extract, width=20).pack(pady=10)
