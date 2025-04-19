@@ -1,9 +1,7 @@
 ## CobaltArchiver
 תוכנה לחילוץ ודחיסת קבצים, מבוססת על 7Z.
 אין בה יתרון משמעותי - רק ללא סייר קבצים, שזה מה שהייתי צריך.
-מה מיוחד בה?
-נכתבה "ללא מגע יד אדם". לא כתבתי בה מילת קוד אחת!
-הכל תוכנת בעזרת AI. (כן מחקתי קטעי קוד שגויים).
+
 
 
 ## הרצה
@@ -17,9 +15,7 @@
 A file extraction and compression software based on 7Z.
 It doesn't offer any significant advantage—just lacks a file explorer, which is precisely what I needed.
 
-What's special about it?
-It was developed "without human intervention." I didn’t write a single line of code myself!
-Everything was programmed using AI. (Although I did delete and fix incorrect code snippets).
+
 
 ## How to Run
 Run the Python file or download the zip file from the Releases page.
